@@ -40,11 +40,11 @@ print([lancaster.stem(t) for t in tokens]) # beautiful -> beauty
 
 '''
 ANALISI GRAMMATICALE
+
 '''
-print(nltk.pos_tag(tokens))
-from nltk.tree import Tree
-from nltk.draw.tree import TreeView
 from nltk.corpus import treebank
-print(treebank.fileids())
-t = treebank.parsed_sents('wsj_0001.mrg')
+from nltk.tree import *
+t = treebank.parsed_sents('wsj_0001.mrg')[0]
 t.draw()
+
+
