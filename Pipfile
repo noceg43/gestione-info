@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 nltk = "*"
+rake-nltk = "*"
+spacy = "*"
+pytextrank = "*"
+yake = "*"
 
 [dev-packages]
 

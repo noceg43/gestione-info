@@ -17,6 +17,68 @@ testo.close()
 print(":::  OTTENUTO IL TESTO       :::")
 
 
+'''
+ESERCIZIO 4
+Confrontare Keyword Extraction (selezionare index term)
+-   YAKE
+-   RAKE
+-   spaCy
+'''
+
+#                                                               YAKE
+import yake
+kw_extractor = yake.KeywordExtractor(stopwords=None) # si può personalizzare in molti modi https://github.com/LIAAD/yake
+keywords = kw_extractor.extract_keywords(libro)
+
+file_yake = open("ES1/yake.txt", "w", encoding='UTF8')
+
+for kw in keywords:
+    file_yake.write(repr(kw))
+    file_yake.write('\n')
+file_yake.close()
+print(":::  YAKE FINITO             :::")
+
+
+#                                                               RAKE
+from rake_nltk import Rake
+
+r = Rake()
+r.extract_keywords_from_text(libro)
+file_rake = open("ES1/rake.txt", "w", encoding='UTF8')
+rake_list = r.get_ranked_phrases_with_scores()
+for w in rake_list:
+    file_rake.write(repr(w))
+    file_rake.write('\n')
+file_rake.close()
+print(":::  RAKE FINITO             :::")
+
+
+#                                                               SPACY    
+#                                   NECESSARIO ESEGUIRE python -m spacy download en_core_web_sm
+import spacy
+import pytextrank
+
+# load a spaCy model, depending on language, scale, etc.
+nlp = spacy.load("en_core_web_sm")
+# add PyTextRank to the spaCy pipeline
+nlp.add_pipe("textrank")
+
+doc = nlp(libro)
+# examine the top-ranked phrases in the document
+file_spacy = open("ES1/spacy.txt", "w", encoding='UTF8')
+for phrase in doc._.phrases:
+    file_spacy.write(phrase.text)
+    file_spacy.write(' ')
+    file_spacy.write(repr(phrase.rank))
+    file_spacy.write(' ')
+    file_spacy.write(repr(phrase.count))
+    file_spacy.write('\n')
+file_spacy.close()
+print(":::  SPACY FINITO            :::")
+
+
+
+
 #tokenizzazione
 tokens = nltk.word_tokenize(libro)
 
@@ -59,3 +121,6 @@ file_nomi.write(repr(nomi))
 file_nomi.close()
 
 print(":::  SELEZIONE NOMI FINITA   :::")
+
+
+
