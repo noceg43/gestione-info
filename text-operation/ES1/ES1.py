@@ -11,7 +11,7 @@ keywords that could be used to index it.
 
 import nltk
 
-testo = open("ES1/dracula.txt", "r", encoding='UTF8')
+testo = open("text-operation/ES1/esempio.txt", "r", encoding='UTF8')
 libro = testo.read()
 testo.close()
 print(":::  OTTENUTO IL TESTO       :::")
@@ -30,7 +30,7 @@ import yake
 kw_extractor = yake.KeywordExtractor(stopwords=None) # si può personalizzare in molti modi https://github.com/LIAAD/yake
 keywords = kw_extractor.extract_keywords(libro)
 
-file_yake = open("ES1/yake.txt", "w", encoding='UTF8')
+file_yake = open("text-operation/ES1/yake.txt", "w", encoding='UTF8')
 
 for kw in keywords:
     file_yake.write(repr(kw))
@@ -44,7 +44,7 @@ from rake_nltk import Rake
 
 r = Rake()
 r.extract_keywords_from_text(libro)
-file_rake = open("ES1/rake.txt", "w", encoding='UTF8')
+file_rake = open("text-operation/ES1/rake.txt", "w", encoding='UTF8')
 rake_list = r.get_ranked_phrases_with_scores()
 for w in rake_list:
     file_rake.write(repr(w))
@@ -65,7 +65,7 @@ nlp.add_pipe("textrank")
 
 doc = nlp(libro)
 # examine the top-ranked phrases in the document
-file_spacy = open("ES1/spacy.txt", "w", encoding='UTF8')
+file_spacy = open("text-operation/ES1/spacy.txt", "w", encoding='UTF8')
 for phrase in doc._.phrases:
     file_spacy.write(phrase.text)
     file_spacy.write(' ')
@@ -82,7 +82,7 @@ print(":::  SPACY FINITO            :::")
 #tokenizzazione
 tokens = nltk.word_tokenize(libro)
 
-file_token = open("ES1/1_tokenizzazione.txt", "w", encoding='UTF8')
+file_token = open("text-operation/ES1/1_tokenizzazione.txt", "w", encoding='UTF8')
 file_token.write(repr(tokens))
 file_token.close()
 
@@ -93,7 +93,7 @@ print(":::  TOKENIZZAZIONE FATTA    :::")
 from nltk.corpus import stopwords
 no_stopwords = [i for i in tokens if i not in stopwords.words("english")]
 
-file_stopwords = open("ES1/2_senza_stopwords.txt", "w", encoding='UTF8')
+file_stopwords = open("text-operation/ES1/2_senza_stopwords.txt", "w", encoding='UTF8')
 file_stopwords.write(repr(no_stopwords))
 file_stopwords.close()
 
@@ -105,7 +105,7 @@ from nltk.stem.lancaster import LancasterStemmer
 lancaster = LancasterStemmer()
 stem = [lancaster.stem(t) for t in no_stopwords]
 
-file_stemming = open("ES1/3_stemming.txt", "w", encoding='UTF8')
+file_stemming = open("text-operation/ES1/3_stemming.txt", "w", encoding='UTF8')
 file_stemming.write(repr(stem))
 file_stemming.close()
 
@@ -116,7 +116,7 @@ print(":::  STEMMING COMPLETATO     :::")
 # nltk.pos_tag(stem) returna una lista di tuple con (parola,tipo_parola)
 nomi = [i[0] for i in nltk.pos_tag(stem) if i[1] == 'NN']
 
-file_nomi = open("ES1/4_nomi.txt", "w", encoding='UTF8')
+file_nomi = open("text-operation/ES1/4_nomi.txt", "w", encoding='UTF8')
 file_nomi.write(repr(nomi))
 file_nomi.close()
 
