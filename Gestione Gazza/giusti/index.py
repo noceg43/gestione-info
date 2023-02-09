@@ -20,14 +20,16 @@ writer.commit()
 
 searcher = ix.searcher()
 
-cercato = "spider man"
+if __name__ == "__main__":
+    cercato = " ".join([word for word in sys.argv[1:]])
+    print(cercato)
+
 
 query = QueryParser("content", ix.schema).parse(cercato)
 results = searcher.search(query)
-print("                   Cercato           ", cercato)
 print("WIKIPEDIA")
 for result in results:
-    print(result['title'])
+    print(result['title'], '{:.2f}'.format(result.score))
 
 
 
@@ -53,4 +55,11 @@ query = QueryParser("content", ix.schema).parse(cercato)
 results = searcher.search(query)
 print("TMDB")
 for result in results:
-    print(result['title'])
+    print(result['title'], '{:.2f}'.format(result.score))
+
+
+
+# query aggiungere tipo "solo film genere" o "solo film rating > x"
+
+# unire fonti dandogli peso
+# possibilità usare solo una fonte
