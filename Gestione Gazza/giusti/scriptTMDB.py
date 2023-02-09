@@ -5,7 +5,7 @@ import json
 api_key = "b586e6409d1ab89b937b4708b14edf48"
 
 # La prima pagina di risultati
-page = 1
+page = 480
 
 # Una variabile che indica se ci sono ancora pagine di risultati da scorrere
 more_results = True
@@ -35,6 +35,7 @@ while more_results:
     # Verifica se ci sono altre pagine di risultati
     if data['page'] < data['total_pages']:
       page += 1
+      print(page) 
     else:
       more_results = False
   else:
@@ -43,6 +44,6 @@ while more_results:
     more_results = False
 
 # Apri il file JSON in modalità di scrittura
-with open('results.json2017', 'w') as file:
+with open('results2017.json', 'w') as file:
   # Scrivi i risultati in formato JSON nel file
   json.dump(results, file)
