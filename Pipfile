@@ -9,6 +9,7 @@ rake-nltk = "*"
 spacy = "*"
 pytextrank = "*"
 yake = "*"
+whoosh = "*"
 
 [dev-packages]
 
