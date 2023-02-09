@@ -1,3 +1,21 @@
+################################
+# COMANDI PER ESEGUIRLO
+################################
+'''
+ >>> import nltk
+ >>> nltk.download('stopwords')
+ >>> nltk.download('punkt')
+ >>> nltk.download('averaged_perceptron_tagger')
+
+python -m spacy download en_core_web_sm
+
+'''
+################################
+# COMANDI PER ESEGUIRLO
+################################
+
+
+
 '''
 ESERCIZIO 1
 - Prendere Dracula
