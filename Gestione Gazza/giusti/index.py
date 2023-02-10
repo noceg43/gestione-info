@@ -33,10 +33,12 @@ generi = ' '.join(args.genere)
 schema = Schema(title=ID(stored=True), content=TEXT, genres=KEYWORD)
 
 # Creo l'indice per wikipedia
-ix_wikipedia = create_in("index_wikipedia", schema)
+ix_wikipedia = open_dir("index_wikipedia")
 
 # Creo un writer per l'indice
+'''
 writer_wikipedia = ix_wikipedia.writer()
+
 
 # Apro il file contenente i dati da wikipedia
 with open('wikipediaformattato.json', 'r') as f:
@@ -50,6 +52,8 @@ for element in element_list:
 
 # Commit delle modifiche all'indice
 writer_wikipedia.commit()
+'''
+
 
 # Creo un searcher per l'indice
 searcher_wikipedia = ix_wikipedia.searcher()
@@ -60,6 +64,8 @@ schema = Schema(title=ID(stored=True), content=TEXT, genres=KEYWORD)
 
 
 ix_TMDB = create_in("index_TMDB", schema)
+'''
+
 
 writer_TMDB = ix_TMDB.writer()
 
@@ -99,7 +105,7 @@ for element in element_list:
 
 
 writer_TMDB.commit()
-
+'''
 searcher_TMDB = ix_TMDB.searcher()
 
 
