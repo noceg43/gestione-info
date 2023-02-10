@@ -26,7 +26,10 @@ args = parser.parse_args()
 
 # Unisco la lista di parole della query in una stringa separata da spazi
 query = ' '.join(args.query)
-generi = ' '.join(args.genere)
+if args.genere is not None:
+    generi = ' '.join(args.genere)
+else:
+    generi = None
 
 
 # Creo lo schema per gli indici Whoosh, composto da un campo per il titolo (ID) e uno per il contenuto (TEXT)
@@ -63,7 +66,7 @@ schema = Schema(title=ID(stored=True), content=TEXT, genres=KEYWORD)
 
 
 
-ix_TMDB = create_in("index_TMDB", schema)
+ix_TMDB = open_dir("index_TMDB")
 '''
 
 
@@ -167,6 +170,7 @@ def search(query, source=None, generi=None):
         # Se non sono specificati i generi, eseguire una ricerca solo sulla query di contenuto
         if generi is None:
             results_tmdb = searcher_TMDB.search(content_query)
+            print(results_tmdb)
         # Altrimenti, eseguire una ricerca combinata sulla query di contenuto e sui generi
         else:
             # Creare una lista di query basate su espressioni regolari per ogni genere
