@@ -1,62 +1,160 @@
+# Importo la libreria argparse per gestire gli argomenti da riga di comando
+import argparse
 import json
+# Importo le librerie necessarie per creare gli indici Whoosh
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import *
 from whoosh.qparser import *
+
+# Inizializzo l'oggetto argparse per gestire gli argomenti da riga di comando
+parser = argparse.ArgumentParser()
+# Aggiungo l'argomento "fonte", che può avere solo i valori "wikipedia" o "tmdb"
+parser.add_argument('-f', '--fonte', choices=['wikipedia', 'tmdb'],
+                    help='Seleziona la fonte da cui cercare i risultati')
+# Aggiungo l'argomento "query", che è composto da una lista di parole da cercare
+parser.add_argument('query', nargs='+', help='Inserisci le parole da cercare')
+# Analizzo gli argomenti passati da riga di comando
+args = parser.parse_args()
+
+# Unisco la lista di parole della query in una stringa separata da spazi
+query = ' '.join(args.query)
+
+# Creo lo schema per gli indici Whoosh, composto da un campo per il titolo (ID) e uno per il contenuto (TEXT)
 schema = Schema(title=ID(stored=True), content=TEXT)
 
+# Creo l'indice per wikipedia
+ix_wikipedia = create_in("index_wikipedia", schema)
 
-ix = create_in("index_wikipedia", schema)
+# Creo un writer per l'indice
+writer_wikipedia = ix_wikipedia.writer()
 
-writer = ix.writer()
-
+# Apro il file contenente i dati da wikipedia
 with open('wikipediaformattato.json', 'r') as f:
-    # Carica il contenuto del file in una lista
+    # Carico il contenuto del file in una lista
     element_list = json.load(f)
 
+# Aggiungo i documenti all'indice
 for element in element_list:
-    writer.add_document(title=element['Title'], content=element['Plot'])
+    writer_wikipedia.add_document(
+        title=element['Title'], content=element['Plot'])
 
-writer.commit()
+# Commit delle modifiche all'indice
+writer_wikipedia.commit()
 
-searcher = ix.searcher()
+# Creo un searcher per l'indice
+searcher_wikipedia = ix_wikipedia.searcher()
 
-if __name__ == "__main__":
-    cercato = " ".join([word for word in sys.argv[1:]])
-    print(cercato)
-
-
-query = QueryParser("content", ix.schema).parse(cercato)
-results = searcher.search(query)
-print("WIKIPEDIA")
-for result in results:
-    print(result['title'], '{:.2f}'.format(result.score))
-
-
-
+# Ripeto lo stesso procedimento per l'indice di TMDB
 schema = Schema(title=ID(stored=True), content=TEXT)
 
 
-ix = create_in("index_TMDB", schema)
+ix_TMDB = create_in("index_TMDB", schema)
 
-writer = ix.writer()
+writer_TMDB = ix_TMDB.writer()
 
 with open('tmdbformattato.json', 'r') as f:
-    # Carica il contenuto del file in una lista
+    # Carico il contenuto del file in una lista
     element_list = json.load(f)
 
 for element in element_list:
-    writer.add_document(title=element['title'], content=element['overview'])
+    writer_TMDB.add_document(
+        title=element['title'], content=element['overview'])
 
-writer.commit()
+writer_TMDB.commit()
 
-searcher = ix.searcher()
+searcher_TMDB = ix_TMDB.searcher()
 
-query = QueryParser("content", ix.schema).parse(cercato)
-results = searcher.search(query)
-print("TMDB")
-for result in results:
-    print(result['title'], '{:.2f}'.format(result.score))
 
+# Costanti per il calcolo del punteggio combinato
+PESO_WIKIPEDIA = 0.3
+PESO_TMDB = 0.7
+
+
+class Film:
+    def __init__(self, title, score_wikipedia, score_tmdb):
+        """
+        Inizializzazione di un'istanza Film
+        """
+        self.title = title
+        self.score_wikipedia = score_wikipedia
+        self.score_tmdb = score_tmdb
+
+    def combined_score(self):
+        """
+        Calcola il punteggio combinato utilizzando i pesi definiti
+        """
+        return self.score_wikipedia * PESO_WIKIPEDIA + self.score_tmdb * PESO_TMDB
+
+    def __str__(self):
+        """
+        Restituisce una rappresentazione testuale dell'oggetto Film
+        """
+        return self.title + f'{self.combined_score():.2f}'
+
+
+def search(query, source=None):
+    # Inizializzare una lista vuota per i risultati
+    films = []
+    results_wikipedia = None
+    results_tmdb = None
+    # Cercare i risultati su Wikipedia se la fonte è specificata come 'wikipedia'
+    if source == 'wikipedia':
+        results_wikipedia = searcher_wikipedia.search(
+            QueryParser("content", ix_wikipedia.schema).parse(query))
+        print("Risultati da Wikipedia")
+        for result in results_wikipedia:
+            films.append(Film(result['title'], result.score, "wikipedia"))
+    # Cercare i risultati su TMDB se la fonte è specificata come 'tmdb'
+    elif source == 'tmdb':
+        results_tmdb = searcher_TMDB.search(
+            QueryParser("content", ix_TMDB.schema).parse(query))
+        print("Risultati da TMDB")
+        for result in results_tmdb:
+            films.append(Film(result['title'], result.score, "tmdb"))
+    # Cercare i risultati sia su Wikipedia che su TMDB se la fonte non è specificata
+    elif source is None:
+        results_wikipedia = searcher_wikipedia.search(
+            QueryParser("content", ix_wikipedia.schema).parse(query))
+        print("Risultati combinati:")
+        for result in results_wikipedia:
+            films.append(Film(result['title'], result.score, "wikipedia"))
+        results_tmdb = searcher_TMDB.search(
+            QueryParser("content", ix_TMDB.schema).parse(query))
+        for result in results_tmdb:
+            films.append(Film(result['title'], result.score, "tmdb"))
+    # Stampare un messaggio di errore se la fonte non è valida e restituire
+    else:
+        print("Fonte non valida")
+        return
+    # Creare una lista di istanze Film per tutti i film trovati in entrambe le fonti
+    films = []
+    if results_wikipedia is not None:
+        for result in results_wikipedia:
+            films.append(Film(result['title'], result.score, 0))
+
+    if results_tmdb is not None:
+        for result in results_tmdb:
+            films.append(Film(result['title'], 0, result.score))
+
+    # Unire i film con lo stesso titolo
+    films_combined = {}
+    for film in films:
+        if film.title in films_combined:
+            current_film = films_combined[film.title]
+            films_combined[film.title] = Film(
+                film.title,
+                current_film.score_wikipedia + film.score_wikipedia,
+                current_film.score_tmdb + film.score_tmdb
+            )
+        else:
+            films_combined[film.title] = film
+
+    # Stampare i risultati finali ordinati per punteggio combinato
+    for film in sorted(films_combined.values(), key=lambda x: x.combined_score(), reverse=True):
+        print(film.title, f'{film.combined_score():.2f}')
+
+
+search(query, args.fonte)
 
 
 # query aggiungere tipo "solo film genere" o "solo film rating > x"
