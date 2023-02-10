@@ -137,27 +137,39 @@ def search(query, source=None, generi=None):
     results_tmdb = None
     # Cercare i risultati su Wikipedia se la fonte è specificata come 'wikipedia'
     if source == 'wikipedia':
+        # Creare un parser per la query di ricerca sul contenuto
         content_query = QueryParser("content", ix_wikipedia.schema).parse(query)
 
+        # Se non sono specificati i generi, eseguire una ricerca solo sulla query di contenuto
         if generi is None:
             results_wikipedia = searcher_wikipedia.search(content_query)
+        # Altrimenti, eseguire una ricerca combinata sulla query di contenuto e sui generi
         else:
+            # Creare una lista di query basate su espressioni regolari per ogni genere
             genres_list = generi.split()
-            genres_query = [Regex("genres", ".*" + genre + ".*") for genre in genres_list]            
+            genres_query = [Regex("genres", ".*" + genre + ".*") for genre in genres_list] 
+            # Eseguire la ricerca combinata
             results_wikipedia = searcher_wikipedia.search(And([content_query, *genres_query]))
         print("Risultati da Wikipedia")
+        # Per ogni risultato della ricerca,
         for result in results_wikipedia:
             films.append(Film(result['title'], result.score, "wikipedia"))
     # Cercare i risultati su TMDB se la fonte è specificata come 'tmdb'
     elif source == 'tmdb':
+        # Creare un parser per la query di ricerca sul contenuto
         content_query = QueryParser("content", ix_TMDB.schema).parse(query)
+        # Se non sono specificati i generi, eseguire una ricerca solo sulla query di contenuto
         if generi is None:
             results_tmdb = searcher_TMDB.search(content_query)
+        # Altrimenti, eseguire una ricerca combinata sulla query di contenuto e sui generi
         else:
+            # Creare una lista di query basate su espressioni regolari per ogni genere
             genres_list = generi.split()
-            genres_query = [Regex("genres", ".*" + genre + ".*") for genre in genres_list]            
+            genres_query = [Regex("genres", ".*" + genre + ".*") for genre in genres_list] 
+            # Eseguire la ricerca combinata
             results_tmdb = searcher_TMDB.search(And([content_query, *genres_query]))            
         print("Risultati da TMDB")
+        # Per ogni risultato della ricerca, creare un oggetto Film e aggiungerlo alla lista dei film
         for result in results_tmdb:
             films.append(Film(result['title'], result.score, "tmdb"))
     # Cercare i risultati sia su Wikipedia che su TMDB se la fonte non è specificata
