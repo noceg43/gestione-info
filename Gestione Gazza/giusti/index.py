@@ -245,7 +245,7 @@ search(query, args.fonte, generi)
 end = time.perf_counter()
 
 # Stampa il tempo impiegato
-print("Tempo impiegato:", end - start, "secondi")
+print("Tempo impiegato:",f'{( end - start):.2f}', "secondi")
 
 
 
