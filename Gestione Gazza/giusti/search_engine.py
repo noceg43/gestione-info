@@ -1,6 +1,3 @@
-# Importo la libreria argparse per gestire gli argomenti da riga di comando
-import argparse
-import json
 # Importo le librerie necessarie per creare gli indici Whoosh
 from whoosh.fields import Schema, TEXT, ID, KEYWORD, STORED
 from whoosh.index import *
